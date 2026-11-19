@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Монетный мир</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:16px;font-family:system-ui,Arial;background:linear-gradient(145deg,#101b3c,#293d70);color:#f7f8ff;min-height:100vh}main{max-width:820px;margin:auto}.card{background:#ffffff12;border:1px solid #ffffff28;border-radius:18px;padding:17px;margin:13px 0}h1{margin:8px 0 4px;font-size:30px}.muted,.small{color:#c5d0ef}.muted{font-size:14px}.small{font-size:12px}input,button{font:inherit;border-radius:12px;padding:12px;border:0;width:100%;margin:6px 0}input{background:#f5f7ff;color:#17213d}button{background:#ffd45a;color:#252039;font-weight:750;cursor:pointer}button.secondary{background:#dbe5ff}button.danger{background:#ffaaa8}.row{display:flex;gap:9px;align-items:center}.row>*{flex:1;min-width:0}.hidden{display:none!important}.balance{font-size:30px;font-weight:850;color:#ffdf75}.pill{display:inline-block;padding:5px 10px;border-radius:99px;background:#ffffff20;font-size:12px}.item{padding:11px;border-radius:12px;background:#ffffff12;margin:7px 0;overflow-wrap:anywhere}.notice{padding:11px;border-radius:10px;background:#12264b;margin:8px 0;color:#dce7ff}.tabs{display:flex;gap:7px;flex-wrap:wrap}.tabs button{width:auto;flex:1}.player{display:flex;gap:10px;align-items:center;justify-content:space-between}.player button{width:auto;min-width:95px}.casebox{text-align:center;padding:15px;background:#101b3c88;border-radius:15px}.reel{font-size:46px;min-height:75px;padding:12px}.tag{font-size:12px;color:#ffdf75}.adminTools{background:#101b3c66;padding:10px;border-radius:12px;margin-top:8px}.spin{animation:pulse .16s infinite alternate}@keyframes pulse{to{transform:scale(1.08);filter:brightness(1.5)}}
+</style></head><body><main>
+<header><div class="pill">🎮 мини-игра</div><h1>🌟 Монетный мир</h1><div class="muted">Собирай предметы, открывай кейсы и пополняй коллекцию.</div></header>
+<section id="auth" class="card"><h2 id="authTitle">Вход или регистрация</h2>
+<div id="firstInfo" class="notice">Первый зарегистрированный игрок станет администратором. Все следующие регистрации создают обычные аккаунты.</div>
+<input id="nick" placeholder="Ник (3–18 символов)" maxlength="18" autocomplete="username">
+<input id="pass" placeholder="Пароль (минимум 4 символа)" type="password" maxlength="60" autocomplete="new-password">
+<div class="row"><button id="regBtn" onclick="register()">Создать аккаунт</button><button id="loginBtn" class="secondary" onclick="login()">Войти</button></div>
+<div id="authMsg" class="small"></div><div class="small">Демо-версия: аккаунты сохраняются в браузере на этом устройстве. Для игры между разными телефонами нужен сервер.</div>
+</section>
+<section id="game" class="hidden">
+<div class="card"><div class="row"><div><div class="muted">Игрок</div><h2 id="who" style="margin:2px 0"></h2><span id="role" class="pill"></span></div><div style="text-align:right"><div class="muted">Баланс</div><div class="balance">🪙 <span id="coins">0</span></div></div></div>
+<div class="row"><button id="claimBtn" onclick="claim100()">🎁 Получить 100 монет</button><button class="secondary" onclick="logout()">Выйти</button></div><div id="claimInfo" class="small"></div></div>
+<div class="card"><div class="tabs"><button class="secondary" onclick="showTab('inventory')">🎒 Инвентарь</button><button class="secondary" onclick="showTab('case')">🎁 Кейсы</button><button class="secondary" onclick="showTab('players')">👥 Игроки</button><button class="secondary" onclick="showTab('auction')">🏪 Аукцион</button><button id="adminTab" class="secondary hidden" onclick="showTab('admin')">👑 Админ</button></div></div>
+<div id="inventory" class="card"><h2>🎒 Мой инвентарь</h2><div id="items"></div></div>
+<div id="case" class="card hidden"><h2>🎁 Волшебный кейс</h2><p class="muted">Стоимость открытия: 25 монет. Чем реже предмет, тем меньше шанс его получить.</p><div class="casebox"><div id="reel" class="reel">🎁</div><div id="caseResult" class="tag">Готов открыть кейс?</div><button id="spinBtn" onclick="spinCase()">🎰 Крутить за 25 🪙</button></div></div>
+<div id="players" class="card hidden"><h2>👥 Игроки</h2><div id="playerList"></div></div>
+<div id="auction" class="card hidden"><h2>🏪 Аукцион игроков</h2>
+<p class="muted">Любой игрок может выставить свой предмет на продажу. Другие игроки могут купить его за монеты.</p>
+<h3>Выставить предмет</h3><select id="auctionItem" style="width:100%;padding:12px;border-radius:12px;margin:6px 0"></select>
+<input id="auctionPrice" type="number" min="1" step="1" placeholder="Цена в монетах">
+<button onclick="listAuctionItem()">Выставить на аукцион</button><div id="auctionMsg" class="small"></div>
+<h3>Активные объявления</h3><div id="auctionListings"></div>
+<h3>Мои объявления</h3><div id="myListings"></div></div>
+<div id="admin" class="card hidden"><h2>👑 Панель администратора</h2><p class="muted">Администратор может играть, просматривать все профили и управлять монетами.</p><h3>Все игроки и их инвентари</h3><div id="adminPlayers"></div><div class="adminTools"><h3>Выдать или забрать монеты</h3><input id="targetNick" placeholder="Точный ник игрока"><input id="coinAmount" type="number" min="1" step="1" placeholder="Количество монет"><div class="row"><button onclick="changeCoins(1)">➕ Выдать</button><button class="danger" onclick="changeCoins(-1)">➖ Забрать</button></div><div id="adminMsg" class="small"></div></div><h3>История операций</h3><div id="history"></div></div>
+</section></main>
+<script>
+const KEY='coinWorld_v3';
+let db;
+try{db=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){db=null}
+if(!db||!db.users)db={users:{},history:[],admin:null};
+if(!Array.isArray(db.history))db.history=[];
+if(!Array.isArray(db.auctions))db.auctions=[];
+let current=null,spinning=false;
+const catalog=[
+ ['🪵','Дерево','обычный',45],['🪨','Камень','обычный',35],['🍎','Яблоко','обычный',30],['🧱','Кирпич','обычный',28],['🪙','Старая монета','обычный',25],
+ ['🗡️','Деревянный меч','необычный',18],['🛡️','Щит путешественника','необычный',16],['🧪','Зелье удачи','необычный',14],['🐾','След дракона','необычный',12],
+ ['💎','Алмаз','редкий',8],['🏹','Лук охотника','редкий',7],['🪄','Волшебная палочка','редкий',6],['🦊','Лисёнок','редкий',5],
+ ['👑','Корона','эпический',2.5],['🐉','Дракончик','эпический',2],['🌈','Радужный кристалл','эпический',1.8],['🚀','Космический корабль','эпический',1.5],
+ ['🌌','Галактика','легендарный',0.8],['🐲','Золотой дракон','легендарный',0.5],['🏆','Кубок чемпионов','легендарный',0.4]
+];
+function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function el(id){return document.getElementById(id)}
+function cleanNick(s){return s.trim().replace(/[^a-zA-Z0-9_\u0400-\u04FF]/g,'').slice(0,18)}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function register(){
+ const n=cleanNick(el('nick').value),p=el('pass').value;
+ if(n.length<3||p.length<4){el('authMsg').textContent='Ник должен быть от 3 символов, пароль — от 4.';return}
+ if(db.users[n]){el('authMsg').textContent='Такой ник уже занят.';return}
+ const isAdmin=!db.admin;
+ db.users[n]={password:p,coins:1000,claims:0,items:isAdmin?['🏆 Значок основателя']:['🎒 Стартовый рюкзак']};
+ if(isAdmin)db.admin=n;
+ db.history.push({text:isAdmin?'Создан аккаунт администратора: '+n:'Зарегистрировался игрок: '+n});
+ save();el('nick').value='';el('pass').value='';current=n;openGame();
+}
+function login(){
+ const n=cleanNick(el('nick').value),p=el('pass').value;
+ if(!db.users[n]||db.users[n].password!==p){el('authMsg').textContent='Неверный ник или пароль.';return}
+ el('nick').value='';el('pass').value='';current=n;openGame();
+}
+function openGame(){el('auth').classList.add('hidden');el('game').classList.remove('hidden');el('who').textContent=current;el('role').textContent=current===db.admin?'АДМИНИСТРАТОР':'ИГРОК';el('adminTab').classList.toggle('hidden',current!==db.admin);refresh();showTab('inventory')}
+function logout(){current=null;el('game').classList.add('hidden');el('auth').classList.remove('hidden');el('nick').value='';el('pass').value=''}
+function showTab(t){if(t==='admin'&&current!==db.admin)t='inventory';['inventory','case','players','auction','admin'].forEach(x=>el(x).classList.toggle('hidden',x!==t));
+ if(t==='auction')renderAuction();}
+function refresh(){
+ if(!current||!db.users[current])return;
+ el('coins').textContent=db.users[current].coins;
+ const claimUser=db.users[current];
+ claimUser.claims=Number.isInteger(claimUser.claims)?claimUser.claims:0;
+ if(current!==db.admin){
+   el('claimInfo').textContent='Самостоятельное получение: '+claimUser.claims+'/2 использовано (по 100 монет).';
+   el('claimBtn').disabled=claimUser.claims>=2;
+   el('claimBtn').textContent=claimUser.claims>=2?'Лимит 2/2 использован':'🎁 Получить 100 монет';
+ }else{
+   el('claimInfo').textContent='Стартовый баланс администратора — 1000 монет. Выдавай монеты игрокам через панель админа.';
+   el('claimBtn').disabled=true;
+   el('claimBtn').textContent='Получение доступно обычным игрокам';
+ }
+ const inv=db.users[current].items;
+ el('items').innerHTML=inv.length?inv.map((x,i)=>'<div class="item">'+esc(x)+'</div>').join(''):'<div class="muted">Инвентарь пока пуст.</div>';
+ el('playerList').innerHTML=Object.keys(db.users).map(n=>'<div class="item">👤 '+esc(n)+(n===current?' — это ты':'')+'</div>').join('');
+ if(!el('auction').classList.contains('hidden'))renderAuction();
+ if(current===db.admin){
+  el('adminPlayers').innerHTML=Object.keys(db.users).map(n=>'<div class="item"><b>👤 '+esc(n)+'</b> · 🪙 '+db.users[n].coins+'<br><span class="small">'+(db.users[n].items.length?db.users[n].items.map(esc).join(' · '):'Инвентарь пуст')+'</span></div>').join('');
+  el('history').innerHTML=db.history.slice().reverse().map(x=>'<div class="item">'+esc(x.text)+'</div>').join('')||'Пока нет операций.';
+ }
+}
+function claim100(){
+ const user=db.users[current];
+ if(current===db.admin){el('caseResult').textContent='Администратор управляет монетами через панель админа.';return}
+ user.claims=Number.isInteger(user.claims)?user.claims:0;
+ if(user.claims>=2){alert('Ты уже использовал оба получения по 100 монет.');return}
+ user.coins+=100;user.claims++;
+ db.history.push({text:current+' самостоятельно получил(а) 100 монет ('+user.claims+'/2)'});
+ save();refresh();
+}
+function changeCoins(sign){
+ if(current!==db.admin){el('adminMsg').textContent='Нет прав администратора.';return}
+ const n=cleanNick(el('targetNick').value),a=Number(el('coinAmount').value);
+ if(!db.users[n]){el('adminMsg').textContent='Игрок с таким ником не найден.';return}
+ if(!Number.isSafeInteger(a)||a<1){el('adminMsg').textContent='Введи целое число больше нуля.';return}
+ if(sign<0&&db.users[n].coins<a){el('adminMsg').textContent='У игрока недостаточно монет.';return}
+ db.users[n].coins+=sign*a;
+ const action=sign>0?'выдал':'забрал';
+ db.history.push({text:current+' '+action+' '+a+' монет у/игроку '+n});
+ save();refresh();el('adminMsg').textContent='Готово! Баланс '+n+': '+db.users[n].coins+' монет.';
+}
+function spinCase(){
+ if(spinning)return;
+ if(db.users[current].coins<25){el('caseResult').textContent='Не хватает монет! Нужно 25.';return}
+ spinning=true;db.users[current].coins-=25;save();refresh();
+ el('spinBtn').disabled=true;el('reel').classList.add('spin');
+ let ticks=0;const timer=setInterval(()=>{
+  const r=catalog[Math.floor(Math.random()*catalog.length)];
+  el('reel').textContent=r[0];ticks++;
+  if(ticks>=18){
+   clearInterval(timer);const item=pickItem();db.users[current].items.push(item[0]+' '+item[1]+' ['+item[2]+']');
+   db.history.push({text:current+' открыл кейс и получил: '+item[1]});
+   save();refresh();el('reel').classList.remove('spin');el('reel').textContent=item[0];
+   el('caseResult').textContent='Выпало: '+item[1]+' · '+item[2]+'!';el('spinBtn').disabled=false;spinning=false;
+  }
+ },100);
+}
+function pickItem(){const total=catalog.reduce((s,x)=>s+x[3],0);let r=Math.random()*total;for(const x of catalog){r-=x[3];if(r<=0)return x}return catalog[0]}
+
+function renderAuction(){
+ const user=db.users[current],sel=el('auctionItem');
+ sel.innerHTML=user.items.length?user.items.map((item,i)=>'<option value="'+i+'">'+esc(item)+'</option>').join(''):'<option value="">Инвентарь пуст</option>';
+ const active=db.auctions.filter(x=>x.status==='active');
+ el('auctionListings').innerHTML=active.length?active.map(x=>'<div class="item"><b>'+esc(x.item)+'</b><br>Продавец: '+esc(x.seller)+' · Цена: 🪙 '+x.price+(x.seller===current?' <span class="tag">(твоё объявление)</span>':'')+(x.seller===current?'<button class="danger" onclick="cancelListing('+x.id+')">Снять с продажи</button>':'<button onclick="buyListing('+x.id+')">Купить</button>')+'</div>').join(''):'<div class="muted">Пока нет объявлений.</div>';
+ const mine=active.filter(x=>x.seller===current);
+ el('myListings').innerHTML=mine.length?mine.map(x=>'<div class="item">'+esc(x.item)+' — 🪙 '+x.price+'</div>').join(''):'<div class="muted">У тебя пока нет объявлений.</div>';
+}
+function listAuctionItem(){
+ const idx=Number(el('auctionItem').value),price=Number(el('auctionPrice').value),user=db.users[current];
+ if(!user.items.length||!Number.isInteger(idx)||idx<0||idx>=user.items.length){el('auctionMsg').textContent='Сначала получи предмет в инвентарь.';return}
+ if(!Number.isSafeInteger(price)||price<1){el('auctionMsg').textContent='Укажи цену — целое число больше нуля.';return}
+ const item=user.items.splice(idx,1)[0];
+ db.auctions.push({id:Date.now()+Math.floor(Math.random()*100000),seller:current,item,price,status:'active'});
+ db.history.push({text:current+' выставил на аукцион '+item+' за '+price+' монет'});
+ save();refresh();renderAuction();el('auctionMsg').textContent='Предмет выставлен на аукцион!';el('auctionPrice').value='';
+}
+function buyListing(id){
+ const listing=db.auctions.find(x=>x.id===id&&x.status==='active');
+ if(!listing)return;
+ if(listing.seller===current){el('auctionMsg').textContent='Нельзя купить собственное объявление. Сними его с продажи.';return}
+ if(db.users[current].coins<listing.price){el('auctionMsg').textContent='Недостаточно монет для покупки.';return}
+ if(!db.users[listing.seller]){el('auctionMsg').textContent='Аккаунт продавца не найден.';return}
+ db.users[current].coins-=listing.price;db.users[listing.seller].coins+=listing.price;
+ db.users[current].items.push(listing.item);listing.status='sold';listing.buyer=current;
+ db.history.push({text:current+' купил у '+listing.seller+' предмет '+listing.item+' за '+listing.price+' монет'});
+ save();refresh();renderAuction();el('auctionMsg').textContent='Покупка успешна! Предмет добавлен в инвентарь.';
+}
+function cancelListing(id){
+ const listing=db.auctions.find(x=>x.id===id&&x.status==='active'&&x.seller===current);
+ if(!listing)return;
+ listing.status='cancelled';db.users[current].items.push(listing.item);
+ db.history.push({text:current+' снял с аукциона '+listing.item});
+ save();refresh();renderAuction();el('auctionMsg').textContent='Объявление снято, предмет возвращён в инвентарь.';
+}
+
+function initAuth(){
+ const hasAdmin=!!db.admin&&!!db.users[db.admin];
+ el('authTitle').textContent=hasAdmin?'Вход или регистрация':'Регистрация первого аккаунта';
+ el('firstInfo').classList.toggle('hidden',hasAdmin);
+ el('regBtn').classList.remove('hidden');
+ el('loginBtn').classList.remove('hidden');
+}
+initAuth();save();
+</script></body></html>
