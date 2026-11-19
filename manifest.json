@@ -1,1 +1,11 @@
-
+{
+  "name": "Монетный мир",
+  "short_name": "Монетный мир",
+  "description": "Игра Монетный мир: открывай кейсы, собирай предметы и торгуй на аукционе.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#2563eb",
+  "icons": []
+}
