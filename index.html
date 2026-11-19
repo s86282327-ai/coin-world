@@ -5,17 +5,35 @@
 <title>Монетный мир</title>
 <style>
 *{box-sizing:border-box}body{margin:0;padding:16px;font-family:system-ui,Arial;background:linear-gradient(145deg,#101b3c,#293d70);color:#f7f8ff;min-height:100vh}main{max-width:820px;margin:auto}.card{background:#ffffff12;border:1px solid #ffffff28;border-radius:18px;padding:17px;margin:13px 0}h1{margin:8px 0 4px;font-size:30px}.muted,.small{color:#c5d0ef}.muted{font-size:14px}.small{font-size:12px}input,button{font:inherit;border-radius:12px;padding:12px;border:0;width:100%;margin:6px 0}input{background:#f5f7ff;color:#17213d}button{background:#ffd45a;color:#252039;font-weight:750;cursor:pointer}button.secondary{background:#dbe5ff}button.danger{background:#ffaaa8}.row{display:flex;gap:9px;align-items:center}.row>*{flex:1;min-width:0}.hidden{display:none!important}.balance{font-size:30px;font-weight:850;color:#ffdf75}.pill{display:inline-block;padding:5px 10px;border-radius:99px;background:#ffffff20;font-size:12px}.item{padding:11px;border-radius:12px;background:#ffffff12;margin:7px 0;overflow-wrap:anywhere}.notice{padding:11px;border-radius:10px;background:#12264b;margin:8px 0;color:#dce7ff}.tabs{display:flex;gap:7px;flex-wrap:wrap}.tabs button{width:auto;flex:1}.player{display:flex;gap:10px;align-items:center;justify-content:space-between}.player button{width:auto;min-width:95px}.casebox{text-align:center;padding:15px;background:#101b3c88;border-radius:15px}.reel{font-size:46px;min-height:75px;padding:12px}.tag{font-size:12px;color:#ffdf75}.adminTools{background:#101b3c66;padding:10px;border-radius:12px;margin-top:8px}.spin{animation:pulse .16s infinite alternate}@keyframes pulse{to{transform:scale(1.08);filter:brightness(1.5)}}
-</style></head><link rel="manifest" href="./manifest.json"><body><main>
-<header><div class="pill">🎮 мини-игра</div><h1>🌟 Монетный мир</h1><div class="muted">Собирай предметы, открывай кейсы и пополняй коллекцию.</div></header>
-<section id="auth" class="card"><h2 id="authTitle">Вход или регистрация</h2>
-<div id="firstInfo" class="notice">Первый зарегистрированный игрок станет администратором. Все следующие регистрации создают обычные аккаунты.</div>
-<input id="nick" placeholder="Ник (3–18 символов)" maxlength="18" autocomplete="username">
-<input id="pass" placeholder="Пароль (минимум 4 символа)" type="password" maxlength="60" autocomplete="new-password">
-<div class="row"><button id="regBtn" onclick="register()">Создать аккаунт</button><button id="loginBtn" class="secondary" onclick="login()">Войти</button></div>
-<div id="authMsg" class="small"></div><div class="small">Демо-версия: аккаунты сохраняются в браузере на этом устройстве. Для игры между разными телефонами нужен сервер.</div>
-</section>
-<section id="game" class="hidden">
-<div class="card"><div class="row"><div><div class="muted">Игрок</div><h2 id="who" style="margin:2px 0"></h2><span id="role" class="pill"></span></div><div style="text-align:right"><div class="muted">Баланс</div><div class="balance">🪙 <span id="coins">0</span></div></div></div>
+</style><link rel="manifest" href="./manifest.json"></head><body><main>
+< header > < div  class = "pill" > 🎮 міні-гра </ div > < h1 > 🌟 Монетный мир </ h1 > < div  class = "muted" > Збирай предмети, відкривай кейси та поповняй колекцію. </ div > </ header > 
+section 
+id
+ = 
+"auth" 
+class
+ = 
+"card" 
+> < 
+h2 
+id
+ = 
+"authTitle" 
+>
+ Вхід або реєстрація 
+< 
+/ 
+h2 
+>
+<   
+< div  id = "firstInfo"  class = "notice" > Перший зареєстрований гравець стане адміністратором. Усі наступні реєстрації створюють звичайні облікові записи. </ div >
+< input  id = "nick"  placeholder = "Ник (3–18 символів)"  maxlength = "18"  autocomplete = "username" >
+< input  id = "pass"  placeholder = "Пароль (мінімум 4 символи)"  type = "password"  maxlength = "60"  autocomplete = "new-password" >
+< div  class = "row" > < button  id = "regBtn"  onclick = " register ( ) " > Створити обліковий запис </ button > < button  id = "loginBtn"  class = "secondary"  onclick = " login ( ) " > Увійти </ button > </ div >
+< div  id = "authMsg"  class = "small" > </ div > < div  class = "small" > Демо-версія: облікові записи зберігаються в браузері на цьому пристрої. Для ігор між різними телефонами потрібен сервер. </ div >
+</ розділ >
+< ідентифікатор розділу  = "гра" клас = "прихований" > 
+< div  class = "card" > < div  class = "row" > < div > < div  class = "muted" > Гравець </ div > < h2  id = "who"  style = " margin : 2 px  0 " > </ h2 > < span  id = "role"  class = "pill" > </ span > </ div > < div  style = " text-align : right " > < div  class = "muted" > Баланс </ div > < div  class = "balance" > 🪙 < span  id = "coins" > 0 </ span > </ div > </ div > </ div >
 <div class="row"><button id="claimBtn" onclick="claim100()">🎁 Получить 100 монет</button><button class="secondary" onclick="logout()">Выйти</button></div><div id="claimInfo" class="small"></div></div>
 <div class="card"><div class="tabs"><button class="secondary" onclick="showTab('inventory')">🎒 Инвентарь</button><button class="secondary" onclick="showTab('case')">🎁 Кейсы</button><button class="secondary" onclick="showTab('players')">👥 Игроки</button><button class="secondary" onclick="showTab('auction')">🏪 Аукцион</button><button id="adminTab" class="secondary hidden" onclick="showTab('admin')">👑 Админ</button></div></div>
 <div id="inventory" class="card"><h2>🎒 Мой инвентарь</h2><div id="items"></div></div>
